@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <title>Add Query</title>
+</head>
+
+
+<style>
+
+    .container-1 {
+        padding: 30px;
+        border-radius: 10px;
+        background-color: white;
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: 10px;
+        margin-bottom: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        overflow: auto;
+    }
+
+    .container-2 {
+        padding: 30px;
+        background-color: white;
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: 10px;
+        margin-bottom: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    select {
+        width: fit-content;
+        border: none;
+        background-color: rgb(233, 233, 233);
+        border-radius: 10px;
+        padding: 15px;
+        letter-spacing: 1px;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .btnUpdate {
+        display: none;
+        border-style: none;
+        padding: 5px 10px 5px 10px;
+        background-color: rgb(96, 223, 178);
+        color: white;
+        cursor: pointer;
+        border-radius: 5px;
+        float: left;
+        width: 50%;
+        padding: 10px;
+    }
+
+    .btnCancel {
+        display: none;
+        border-style: none;
+        padding: 5px 10px 5px 10px;
+        background-color: rgb(204, 65, 65);
+        color: white;
+        cursor: pointer;
+        border-radius: 5px;
+        width: 50%;
+        padding: 10px;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+        
+    }
+
+    th,
+    td {
+        padding: 12px;
+        text-align: center;
+        border-bottom: 1px solid #ddd;
+        
+    }
+
+    th {
+        background-color: #5C88C4;
+        color: #fff;
+        
+    }
+
+    tr:hover {
+        background-color: #ECF2FF;
+    }
+</style>
+
+<body>
+    <header>
+       <h1>Add Query</h1>
+    </header>
+
+    <!--Navigation Bar-->
+    <div class="sidebar">
+        <img class="unikl-logo" src="/img/logo-01.png">
+        <img class="profile-img-2" alt="profile" id="profilePic-2">
+        <div class="name-id">
+            <p><span id="userAdminName-2"></span></p>
+            <p><span id="userAdminid-2"></span></p>
+        </div>
+        <hr>
+        <a href="dashboard_admin.html"><i class="fa fa-tachometer" aria-hidden="true"></i><label class="sidebar-title">Dashboard</label></a>
+        <a href="profile_admin.html"><i class="fa fa-address-card" aria-hidden="true"></i><label class="sidebar-title">Profile</label></a>
+        <a href="queryRequest.html"><i class="fa fa-envelope" aria-hidden="true"></i><label class="sidebar-title">Query Request</label></a>
+        <a href="tableData.html"><i class="fa fa-users" aria-hidden="true"></i><label class="sidebar-title">Student</label></a>
+        <a href="add_query.html"><i class="fa fa-plus" aria-hidden="true"></i><label class="sidebar-title">Add Query</label></a>
+        <a href="analytic.html"><i class="fa fa-bar-chart" aria-hidden="true"></i><label class="sidebar-title">Analytic</label></a>
+        <a id="signout"><i class="fa fa-sign-out" aria-hidden="true"></i><label class="sidebar-title">Log Out</label></a>
+
+    </div>
+
+    <div class="content">
+        <div class="container-1">
+
+            <form id="queryForm">
+                <h2>Add New Query</h2>
+                <hr>
+                <label for="Category"><b>Category</b></label><br>
+                <select id="Category" name="Category" required>
+                    <option value="" selected>Choose Category</option>
+                    <option value="Academic">Academic</option>
+                    <option value="Building Information">Building Information</option>
+                    <option value="Finance">Finance</option>
+                </select>
+                <br><br>
+
+                <label for="NewQuery"><b>New query</b></label><br>
+                <input type="text" placeholder="Enter new query" name="NewQuery" id="NewQuery" required><br>
+
+                <label for="NewResponse"><b>New Response</b></label><br>
+                <input type="text" placeholder="Enter new response" name="Response" id="NewResponse" required>
+
+                <input type="submit" value="Add">
+            </form>
+            <button class="btnUpdate" id="update">Update</button>
+            <button class="btnCancel" id="cancel" onclick="cancel()">Cancel</button>
+
+
+        </div>
+
+        <div class="container-1">
+
+            <h2>New Queries</h2>
+            <hr>
+            <table id="queryTable">
+                <thead>
+                    <tr>
+                        <th>No.</th>
+                        <th>Category</th>
+                        <th>Query</th>
+                        <th>Response</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+
+        </div>
+
+    </div>
+</body>
+
+<script>
+    function cancel() {
+        document.getElementById("update").style.display = "none";
+        document.getElementById("cancel").style.display = "none";
+        document.getElementById('queryForm').reset();
+    }
+</script>
+
+<script type="module">
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getStorage, ref as storageRef, getDownloadURL, uploadBytes } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+    import { getDatabase, ref as databaseRef, set, ref, update, push, onValue, orderByChild, equalTo, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    // TODO: Add SDKs for Firebase products that you want to use
+    // https://firebase.google.com/docs/web/setup#available-libraries
+
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyB_eJQZabT4vOgTzMsLnMovg_yjGtRY0x8",
+        authDomain: "chatbot-4718d.firebaseapp.com",
+        databaseURL: "https://chatbot-4718d-default-rtdb.firebaseio.com/",
+        projectId: "chatbot-4718d",
+        storageBucket: "chatbot-4718d.appspot.com",
+        messagingSenderId: "320537928507",
+        appId: "1:320537928507:web:bdb1345ca3fe659aa80d1e"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+    const auth = getAuth();
+    const storage = getStorage(app);
+
+    //sidebar
+    const userAdminNameSpan2 = document.getElementById('userAdminName-2');
+    const userAdminidSpan2 = document.getElementById('userAdminid-2');
+
+    // Firebase authentication state change listener
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            const uid = user.uid;
+            console.log('user logged in', user);
+
+            // Fetch user data from the database based on the user's UID
+            const currentUserRef = ref(database, 'admin/' + uid);
+
+            // Listen for changes in the user's data
+            onValue(currentUserRef, (snapshot) => {
+                const userData = snapshot.val();
+
+                // Display user information on the dashboard page
+                displayUserInfo(userData.admin_name, userData.admin_id);
+
+                // get image from firebase storage
+                getDownloadURL(storageRef(storage, userData.admin_email))
+                    .then((url) => {
+
+                        const img2 = document.getElementById('profilePic-2');
+                        img2.setAttribute('src', url);
+                    })
+                    .catch((error) => {
+                        console.error('Error getting downlaod URL:', error);
+                    })
+            });
+
+        } else {
+            // User is signed out
+            console.log('user Logged out');
+        }
+    });
+
+    //signout function
+    document.getElementById('signout').addEventListener('click', (e) => {
+        signOut(auth)
+            .then(() => {
+                // Successfully signed out
+                alert('Signed out!');
+                // Hide sign-out button
+                window.location.href = "Login_admin.html";
+            })
+            .catch((error) => {
+                console.error('Error signing out:', error);
+            });
+    });
+
+    // Function to display user information
+    function displayUserInfo(name, adminid) {
+        userAdminNameSpan2.textContent = name;
+        userAdminidSpan2.textContent = adminid;
+    }
+
+    //function for add new queries in chatbot firebase
+    document.getElementById('queryForm').addEventListener('submit', function (event) {
+        event.preventDefault(); // Prevent the default form submission
+
+        // Retrieve the values of the input fields
+        const category = document.getElementById('Category').value;
+        const newQuery = document.getElementById('NewQuery').value;
+        const newResponse = document.getElementById('NewResponse').value;
+
+
+        // Reference to the 'chatbot' node
+        const chatbotRef = databaseRef(database, 'chatbot');
+
+        // Push the data to the 'chatbot' node with a unique ID
+        const newChatbotRef = push(chatbotRef);
+        const newChatbotId = newChatbotRef.key;
+
+        set(newChatbotRef, {
+            category: category,
+            query: newQuery,
+            response: newResponse
+        }).then(() => {
+            alert('Data added successfully');
+            // Reset the form
+            document.getElementById('queryForm').reset();
+        }).catch((error) => {
+            alert('Error adding data: ' + error.message);
+
+        });
+    });
+
+
+    // Reference to the 'chatbot' node
+    const chatbotRef = databaseRef(database, 'chatbot');
+
+    function addEditDeleteButtons(row, key) {
+        const editButton = document.createElement('button');
+        editButton.textContent = 'Edit';
+        editButton.addEventListener('click', () => editQuery(key));
+
+        const deleteButton = document.createElement('button');
+        deleteButton.textContent = 'Delete';
+        deleteButton.addEventListener('click', () => deleteQuery(key));
+
+        const actionCell = document.createElement('td');
+        actionCell.appendChild(editButton);
+        actionCell.appendChild(deleteButton);
+
+        row.appendChild(actionCell);
+    }
+
+    // Listen for changes in the 'chatbot' node
+    onValue(chatbotRef, (snapshot) => {
+
+        const queryTableBody = document.querySelector('#queryTable tbody');
+        queryTableBody.innerHTML = ''; // Clear existing table rows
+
+        let counter = 1; // Initialize a counter variable
+
+        snapshot.forEach((childSnapshot) => {
+            const childData = childSnapshot.val();
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                    <td>${counter}</td> 
+                    <td>${childData.category}</td>
+                    <td>${childData.query}</td>
+                    <td>${childData.response}</td>
+                `;
+            addEditDeleteButtons(row, childSnapshot.key); // Add Edit and Delete buttons
+            queryTableBody.appendChild(row);
+            counter++; // Increment the counter
+        });
+
+    });
+
+    // Function to edit a query
+    function editQuery(key) {
+        document.getElementById("update").style.display = "block";
+        document.getElementById("cancel").style.display = "block";
+
+        // Retrieve the query data using the key
+        const queryRef = ref(database, `chatbot/${key}`);
+        onValue(queryRef, (snapshot) => {
+            const queryData = snapshot.val();
+            // Populate the form with the query data for editing
+            document.getElementById('Category').value = queryData.category;
+            document.getElementById('NewQuery').value = queryData.query;
+            document.getElementById('NewResponse').value = queryData.response;
+        });
+
+        // Remove previous click event listeners to prevent duplicate actions
+        const updateButton = document.getElementById('update');
+        const newUpdateButton = updateButton.cloneNode(true);
+        updateButton.parentNode.replaceChild(newUpdateButton, updateButton);
+
+        // Add event listener to the update button
+        newUpdateButton.addEventListener('click', function () {
+            // Retrieve the updated values from the form
+            const updatedCategory = document.getElementById('Category').value;
+            const updatedQuery = document.getElementById('NewQuery').value;
+            const updatedResponse = document.getElementById('NewResponse').value;
+
+            // Update the query in the database
+            update(ref(database, `chatbot/${key}`), {
+                category: updatedCategory,
+                query: updatedQuery,
+                response: updatedResponse
+            }).then(() => {
+                alert('Query updated successfully');
+                // Reset the form and hide the update and cancel buttons
+                document.getElementById('queryForm').reset();
+                document.getElementById("update").style.display = "none";
+                document.getElementById("cancel").style.display = "none";
+            }).catch((error) => {
+                alert('Error updating query: ' + error.message);
+            });
+        });
+    }
+
+
+
+    // Function to delete a query
+    function deleteQuery(key) {
+        if (confirm("Are you sure you want to delete this query?")) {
+            const queryRef = ref(database, `chatbot/${key}`);
+            remove(queryRef)
+                .then(() => {
+                    alert('Query deleted successfully');
+                })
+                .catch((error) => {
+                    console.error('Error deleting query:', error);
+                });
+        }
+    }
+
+</script>
+
+</html>

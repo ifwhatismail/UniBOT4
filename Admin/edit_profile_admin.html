@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Edit Profile</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/style.css">
+</head>
+
+<body>
+    <div class="container">
+        <div id="editForm">
+            <!-- Add your edit form fields here -->
+            <label for="editAdminName">Name:</label><br>
+            <input type="text" id="editAdminName"> <br>
+
+            <label for="editAdminid">Admin ID:</label><br>
+            <input type="text" id="editAdminid"><br>
+
+            <label for="editAdminEmail">Email:</label><br>
+            <input type="text" id="editAdminEmail"><br>
+
+            <label for="editAdminPhone">Phone:</label><br>
+            <input type="text" id="editAdminPhone"><br>
+
+            <label for="studid"><b>Gender</b></label>
+            <input type="radio" name="gender" id="Male" value="Male"> Male
+            <input type="radio" name="gender" id="Female" value="Female" required> Female <br><br>
+
+            <label for="profilePicture"><b>Profile Picture</b></label><br>
+            <input type="file" accept="image/*" name="profilePicture" id="profilePicture"><br><br>
+
+            <button id="updateBtn" class="update-btn">Update</button>
+            <button class="cancel-btn"><a href="profile_admin.html" style="text-decoration: none;">Cancel</a></button>
+        </div>
+    </div>
+</body>
+
+</html>
+
+<script type="module">
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getDatabase, set, ref, update, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getStorage, ref as storageRef, uploadBytes } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+    // TODO: Add SDKs for Firebase products that you want to use
+    // https://firebase.google.com/docs/web/setup#available-libraries
+
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyB_eJQZabT4vOgTzMsLnMovg_yjGtRY0x8",
+        authDomain: "chatbot-4718d.firebaseapp.com",
+        databaseURL: "https://chatbot-4718d-default-rtdb.firebaseio.com",
+        projectId: "chatbot-4718d",
+        storageBucket: "chatbot-4718d.appspot.com",
+        messagingSenderId: "320537928507",
+        appId: "1:320537928507:web:bdb1345ca3fe659aa80d1e"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+    const auth = getAuth();
+    const storage = getStorage(app);
+
+    // Edit form elements
+    const editAdminName = document.getElementById('editAdminName');
+    const editAdminid = document.getElementById('editAdminid');
+    const editAdminEmail = document.getElementById('editAdminEmail');
+    const editAdminPhone = document.getElementById('editAdminPhone');
+    const updateBtn = document.getElementById('updateBtn');
+    const profilePictureInput = document.getElementById('profilePicture');
+
+    // Firebase authentication state change listener
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            const uid = user.uid;
+            console.log('user logged in', user);
+
+            // Fetch user data from the database based on the user's UID
+            const currentUserRef = ref(database, 'admin/' + uid);
+
+            // Listen for changes in the user's data
+            onValue(currentUserRef, (snapshot) => {
+                const userData = snapshot.val();
+
+                // Display user information in the edit form
+                editAdminName.value = userData.admin_name || '';
+                editAdminid.value = userData.admin_id || '';
+                editAdminEmail.value = userData.admin_email || '';
+                editAdminPhone.value = userData.admin_phone || '';
+                document.getElementById(userData.admin_gender).checked = true;
+            });
+
+        } else {
+            // User is signed out
+            console.log('user Logged out');
+        }
+    });
+
+    // Save Changes button click event
+    updateBtn.addEventListener('click', () => {
+        // Get edited values
+        const newAdminName = editAdminName.value;
+        const newAdminid = editAdminid.value;
+        const newAdminEmail = editAdminEmail.value;
+        const newAdminPhone = editAdminPhone.value;
+        const newAdminGender = document.querySelector('input[name="gender"]:checked').value;
+
+        // Update the database with new values
+        update(ref(database, 'admin/' + auth.currentUser.uid), {
+            admin_name: newAdminName,
+            admin_id: newAdminid,
+            admin_email: newAdminEmail,
+            admin_phone: newAdminPhone,
+            admin_gender: newAdminGender,
+        });
+
+        // Upload file into Firebase Storage
+        const file = profilePictureInput.files[0];
+        if (file) {
+            uploadBytes(storageRef(storage, auth.currentUser.email), file)
+                .then((snapshot) => {
+                    console.log('Uploaded file!');
+                    alert('Update successful');
+                    window.location.href = "profile_admin.html";
+                })
+                .catch((error) => {
+                    console.error('Error uploading file:', error);
+                    alert('Update failed');
+                });
+        }
+
+        alert('Update sucessful');
+        window.location.href = "profile_admin.html";
+
+        // Redirect to the next page after successful login
+        //window.location.href = "profile_admin.html";
+    });
+
+</script>

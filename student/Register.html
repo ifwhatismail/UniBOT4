@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="" href="Register.php">
+  <title>Sign Up</title>
+</head>
+
+<style>
+   .unikl-logo {
+        margin-left: auto;
+        margin-right: auto;
+        margin-bottom: -10px;
+        width: 100px;
+    }
+    header a:hover{
+        color: #9BB0C1;
+        transition: .5s;
+    }
+</style>
+
+<body>
+  <!--Navigation Bar-->
+    <header>
+      <img class="unikl-logo" src="/img/logo-01.png"><br>
+      <a href="Login.html">Back</a>
+    </header>
+
+  <!--Form-->
+  <div class="container-register">
+    <h1>Register</h1>
+    <p>Please fill in this form to create an account.</p>
+    <hr>
+    <label for="studname"><b>Name</b></label><br>
+    <input type="text" placeholder="Enter Name" name="name" id="studname" required><br>
+
+    <label for="studid"><b>Student ID</b></label><br>
+    <input type="text" placeholder="Enter Student ID" name="studid" id="studid" maxlength="11" required><br>
+
+    <label for="studid"><b>Phone</b></label><br>
+    <input type="text" placeholder="Enter Phone Number" name="phone" id="phone" maxlength="11" required><br>
+
+    <label for="studid"><b>Gender</b></label>
+    <input type="radio" name="gender" id="Male" value="Male" required> Male
+    <input type="radio" name="gender" id="Female" value="Female" required> Female <br><br>
+
+    <label for="email"><b>Email</b></label><br>
+    <input type="email" placeholder="Enter Email" name="email" id="email" required><br>
+
+    <label for="password"><b>Password</b></label><br>
+    <input type="password" placeholder="Enter Password" name="password" id="password" required>
+    <span id="passwordError" style="color: red;"></span>
+
+    <label for="profilePicture"><b>Profile Picture</b></label><br>
+    <input type="file" accept="image/*" name="profilePicture" id="profilePicture" required><br>
+
+    <hr>
+    <input type="submit" class="register-btn" value="register" id="register">
+
+    <div class="signin">
+      <p>Already have an account? <a href="Login.html">Sign in</a></p>
+    </div>
+  </div>
+
+</body>
+
+<script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+  import { getStorage, ref as storageRef, uploadBytes } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+  import { getDatabase, ref as databaseRef, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  const firebaseConfig = {
+    apiKey: "AIzaSyB_eJQZabT4vOgTzMsLnMovg_yjGtRY0x8",
+    authDomain: "chatbot-4718d.firebaseapp.com",
+    databaseURL: "https://chatbot-4718d-default-rtdb.firebaseio.com/",
+    projectId: "chatbot-4718d",
+    storageBucket: "chatbot-4718d.appspot.com",
+    messagingSenderId: "320537928507",
+    appId: "1:320537928507:web:bdb1345ca3fe659aa80d1e"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const database = getDatabase(app);
+  const auth = getAuth();
+  const storage = getStorage(app);
+
+  const register = document.getElementById('register');
+  register.addEventListener('click', (e) => {
+
+    var studid = document.getElementById('studid').value.trim();
+    var studname = document.getElementById('studname').value.trim();
+    var phone = document.getElementById('phone').value.trim();
+    var gender = document.querySelector('input[name="gender"]:checked').value;
+    var email = document.getElementById('email').value.trim();
+    var password = document.getElementById('password').value;
+    var file = document.getElementById("profilePicture").files[0]
+
+    // Form validation
+
+    if (!studid) {
+      alert('Student ID fields is empty');
+    }
+    else if (!studname) {
+      alert('Student name fields is empty');
+    }
+    else if (!phone) {
+      alert('Phone fields is empty');
+    }
+    else if (!email) {
+      alert('Email ID fields is empty');
+    }
+    else if (!password) {
+      alert('Password ID fields is empty');
+    }
+
+    if (password.length < 6) {
+      document.getElementById('passwordError').innerText = "Password must be at least 6 characters.";
+      return;
+    } else {
+      document.getElementById('passwordError').innerText = "";
+    }
+
+    if (studid.length < 11 || phone.length < 11) {
+      alert("Student ID and Phone Number must be 11 characters.");
+      return;
+    }
+
+    createUserWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        // Signed up 
+        const user = userCredential.user;
+
+        // push user data into realtime database
+        set(databaseRef(database, 'users/' + user.uid), {
+          studid: studid,
+          studname: studname,
+          phone: phone,
+          gender: gender,
+          email: email,
+        })
+
+        // upload file into storage firebase
+        uploadBytes(storageRef(storage, email), file)
+          .then((snapshot) => {
+            alert('Update successful');
+          })
+          .catch((error) => {
+            console.error('Error uploading file:', error);
+            alert('Error uploading file. Please try again.');
+          });
+
+        alert('Registration sucessful!');
+
+      })
+      .catch((error) => {
+        console.error('Error creating user:', error);
+        alert('Error creating user. Please try again.');
+      });
+  })
+
+</script>
+
+
+
+</html>

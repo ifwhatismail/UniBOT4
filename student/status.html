@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/chat.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<style>
+    .container-1 {
+        padding: 30px;
+        background-color: white;
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: 10px;
+        margin-bottom: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+    }
+
+    .container-2 {
+        padding: 30px;
+        background-color: white;
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: 10px;
+        margin-bottom: 50px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+        overflow: auto;
+    }
+
+    .container-3 {
+        padding: 30px;
+        background-color: white;
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: 10px;
+        margin-bottom: 50px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        display: none;
+        border-radius: 10px;
+        overflow: auto;
+    }
+
+    .container-query {
+        padding: 30px;
+        background-color: white;
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: 10px;
+        margin-bottom: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    button {
+        padding: 30px;
+        border-radius: 10px;
+        border-style: none;
+        cursor: pointer;
+        font-size: 20px;
+    }
+
+    .submit-btn {
+        padding: 10px;
+        font-size: 10px;
+        width: 100%;
+        color: white;
+        background-color: #5290ec;
+        cursor: pointer;
+        font-size: 15px;
+    }
+
+    button:hover {
+        background-color: rgb(136, 133, 133);
+    }
+
+    .unresolve-btn {
+        width: 46%;
+        color: white;
+        background-color: #655DBB;
+    }
+
+    .resolved-btn {
+        width: 46%;
+        float: right;
+        color: white;
+        background-color: #BFACE2;
+    }
+
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    th,
+    td {
+        padding: 12px;
+        text-align: center;
+        border-bottom: 1px solid #ddd;
+    }
+
+    th {
+        background-color: #5C88C4;
+        color: #fff;
+    }
+
+    tr:hover {
+        background-color: #ECF2FF;
+    }
+
+    .icon-button__badge {
+        position: absolute;
+        right: 33px;
+        top: 96px;
+        width: 30px;
+        height: 30px;
+        background: red;
+        color: #ffffff;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 50%;
+    }
+
+    
+</style>
+
+<body>
+    <header>
+        <h1>UniBOT</h1>
+    </header>
+    <!--Navigation Bar-->
+    <div class="sidebar">
+        <img class="unikl-logo" src="/img/logo-01.png">
+        <img class="profile-img-2" alt="profile" id="profilePic-2">
+        <div class="name-id">
+            <p><span id="userName-2"></span></p>
+            <p><span id="userStudid-2"></span></p>
+        </div>
+        <hr>
+        <a href="dashboard.html"><i class="fa fa-comments" aria-hidden="true"></i><label class="sidebar-title">ChatBOT</label></a>
+        <a href="user_profile.html"><i class="fa fa-address-card" aria-hidden="true"></i><label class="sidebar-title">Profile</label></a>
+        <a href="history.html"><i class="fa fa-history" aria-hidden="true"></i><label class="sidebar-title">chat history</label></a>
+        <a href="status.html"><i class="fa fa-envelope" aria-hidden="true"></i><label class="sidebar-title">Status</label></a>
+        <a id="signout"><i class="fa fa-sign-out" aria-hidden="true"></i><label class="sidebar-title">Log Out</label></a>
+
+    </div>
+
+    <div class="content">
+        <div class="container-1">
+            <button class="unresolve-btn" onclick="unresolve()">
+                Unresolved Query</button>
+            <button class="resolved-btn" onclick="resolved()">
+                Resolved Query
+            </button>
+        </div>
+
+        <div class="container-2" id="unresolve">
+            <h3>Unresolved Query</h3>
+            <hr>
+            <table id="infoTable">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Student ID</th>
+                        <th>Query</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- Rows will be appended dynamically here -->
+                </tbody>
+            </table>
+        </div>
+
+        <div class="container-3" id="resolved">
+            <h3>Resolved Query</h3>
+            <hr>
+            <table id="resolvedTable">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Name</th>
+                        <th>Query</th>
+                        <th>Answer</th>
+                    </tr>
+
+                </thead>
+                <tbody id="resolvedRow">
+
+                </tbody>
+
+
+            </table>
+        </div>
+
+    </div>
+</body>
+
+<script>
+    function unresolve() {
+        document.getElementById("unresolve").style.display = "block";
+        document.getElementById("resolved").style.display = "none";
+    }
+
+    function resolved() {
+        document.getElementById("resolved").style.display = "block";
+        document.getElementById("unresolve").style.display = "none";
+    }
+</script>
+
+<script type="module">
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getDatabase, set, ref, push, update, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getStorage, ref as storageRef, getDownloadURL, uploadBytes } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+    // TODO: Add SDKs for Firebase products that you want to use
+    // https://firebase.google.com/docs/web/setup#available-libraries
+
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyB_eJQZabT4vOgTzMsLnMovg_yjGtRY0x8",
+        authDomain: "chatbot-4718d.firebaseapp.com",
+        databaseURL: "https://chatbot-4718d-default-rtdb.firebaseio.com",
+        projectId: "chatbot-4718d",
+        storageBucket: "chatbot-4718d.appspot.com",
+        messagingSenderId: "320537928507",
+        appId: "1:320537928507:web:bdb1345ca3fe659aa80d1e"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+    const auth = getAuth();
+    const storage = getStorage(app);
+
+    //-------------------------------ID declaration----------------------------------
+
+    // Get the DOM elements
+    const userNameSpan2 = document.getElementById('userName-2');
+    const userStudidSpan2 = document.getElementById('userStudid-2');
+
+
+    //-------------------------------Firebase----------------------------------
+    // Firebase authentication state change listener
+    onAuthStateChanged(auth, (user) => {
+
+        if (user) {
+            const uid = user.uid;
+            console.log('user logged in', user);
+
+            // Fetch user data from the database based on the user's UID
+            const currentUserRef = ref(database, 'users/' + uid);
+
+            // Listen for changes in the user's data
+            onValue(currentUserRef, (snapshot) => {
+                const userData = snapshot.val();
+
+                // Display user information on the dashboard page
+                displayUserInfo(userData.studname, userData.studid);
+
+                //display user information in table
+                displayUserTable(userData.studname, userData.studid, userData.queries, userData.date)
+
+                // display data in resolved table
+                displayResolvedTable(userData.studname, userData.queries)
+
+                // get image from firebase storage
+                getDownloadURL(storageRef(storage, userData.email))
+                    .then((url) => {
+
+                        const img2 = document.getElementById('profilePic-2');
+                        img2.setAttribute('src', url);
+                    })
+                    .catch((error) => {
+                        console.error('Error getting downlaod URL:', error);
+                    })
+
+            });
+
+        } else {
+            // User is signed out
+            console.log('user Logged out');
+        }
+    });
+
+    //signout function
+    signout.addEventListener('click', (e) => {
+        signOut(auth)
+            .then(() => {
+                // Successfully signed out
+                alert('Signed out!');
+                // Hide sign-out button
+                window.location.href = "Login.html";
+            })
+            .catch((error) => {
+                console.error('Error signing out:', error);
+            });
+    });
+
+    //-------------------------------Function----------------------------------
+
+    // Function to display user information
+    function displayUserInfo(name, studid) {
+        userNameSpan2.textContent = name;
+        userStudidSpan2.textContent = studid;
+    }
+
+    function displayUserTable(name, studid, queries, date) {
+        // Clear existing rows from the table
+        const tableBody = document.getElementById("tableBody");
+        tableBody.innerHTML = "";
+
+        // Assuming queries is an object with keys as unique identifiers
+        // and values as query details
+        for (const queryKey in queries) {
+            if (queries.hasOwnProperty(queryKey)) {
+                const queryData = queries[queryKey];
+
+                // Only display queries with a status of "Pending" (case-insensitive)
+                if (queryData.status.toLowerCase() === "pending") {
+                    // Create a new row
+                    const newRow = document.createElement("tr");
+
+                    // Create cells for the row
+                    const nameCell = document.createElement("td");
+                    const studIDCell = document.createElement("td");
+                    const queryCell = document.createElement("td");
+                    const statusCell = document.createElement("td");
+                    const dateCell = document.createElement("td");
+
+                    // Set cell values
+                    nameCell.textContent = name;
+                    studIDCell.textContent = studid;
+                    queryCell.textContent = queryData.query;
+                    statusCell.textContent = queryData.status;
+                    dateCell.textContent = queryData.query_date;
+
+                    // Append cells to the row
+                    newRow.appendChild(nameCell);
+                    newRow.appendChild(studIDCell);
+                    newRow.appendChild(queryCell);
+                    newRow.appendChild(statusCell);
+                    newRow.appendChild(dateCell);
+
+                    // Append the row to the table
+                    document.getElementById("tableBody").appendChild(newRow);
+                }
+            }
+        }
+    }
+
+
+    function displayResolvedTable(name, queries) {
+        // Clear existing rows from the table
+        const resolvedRow = document.getElementById("resolvedRow");
+        resolvedRow.innerHTML = "";
+
+        // Assuming queries is an object with keys as unique identifiers
+        // and values as query details
+        for (const queryKey in queries) {
+            if (queries.hasOwnProperty(queryKey)) {
+                const queryData = queries[queryKey];
+
+                // Only display queries with a status of "solved"
+                if (queryData.status === "Solved") {
+                    // Create a new row
+                    const newRow = document.createElement("tr");
+
+                    // Create cells for the row
+                    const dateCell = document.createElement("td");
+                    const nameCell = document.createElement("td");
+                    const queryCell = document.createElement("td");
+                    const answerCell = document.createElement("td");
+
+                    // Set cell values
+                    dateCell.textContent = queryData.answer_date;
+                    nameCell.textContent = name;
+                    queryCell.textContent = queryData.query;
+                    answerCell.textContent = queryData.answer;
+
+                    // Append cells to the row
+                    newRow.appendChild(dateCell);
+                    newRow.appendChild(nameCell);
+                    newRow.appendChild(queryCell);
+                    newRow.appendChild(answerCell);
+
+                    // Append the row to the table
+                    document.getElementById("resolvedRow").appendChild(newRow);
+                }
+            }
+        }
+    }
+
+
+</script>
+
+</html>

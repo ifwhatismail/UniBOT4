@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/style.css">
+</head>
+
+<style>
+    .unikl-logo {
+        margin-left: auto;
+        margin-right: auto;
+        margin-bottom: -10px;
+        width: 100px;
+    }
+    header a:hover{
+        color: #9BB0C1;
+        transition: .5s;
+    }
+</style>
+
+<body>
+    <!--Navigation Bar-->
+        <header>
+            <img class="unikl-logo" src="/img/logo-01.png"><br>
+            <a href="/student/Login.html">Go Student Page</a>
+        </header>
+
+    <!--Form-->
+    <div class="container-login">
+        <center>
+            <h1>Login (Admin)</h1>
+            <p>Please fill in this form to Login into Admin UniBot System</p>
+        </center>
+      
+        <hr>
+
+        <label for="email"><b>Email</b></label><br>
+        <input type="email" placeholder="Enter Email" name="email" id="email" required><br>
+
+        <label for="password"><b>Password</b></label><br>
+        <input type="password" placeholder="Enter Password" name="psw" id="password" required>
+        <input type="checkbox" onclick="togglePassword()"> Show Password
+
+        <hr>
+
+        <input type="submit" value="Login" id="login">
+        <p style="text-align: center;"><a href="#" id="forgotPassword">Forgot Password?</a></p>
+    </div>
+
+</body>
+
+<script>
+    function togglePassword() {
+        var passwordField = document.getElementById("password");
+        if (passwordField.type === "password") {
+            passwordField.type = "text";
+        } else {
+            passwordField.type = "password";
+        }
+    }
+</script>
+
+<script type="module">
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getDatabase, set, ref, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    // TODO: Add SDKs for Firebase products that you want to use
+    // https://firebase.google.com/docs/web/setup#available-libraries
+
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyB_eJQZabT4vOgTzMsLnMovg_yjGtRY0x8",
+        authDomain: "chatbot-4718d.firebaseapp.com",
+        databaseURL: "https://chatbot-4718d-default-rtdb.firebaseio.com",
+        projectId: "chatbot-4718d",
+        storageBucket: "chatbot-4718d.appspot.com",
+        messagingSenderId: "320537928507",
+        appId: "1:320537928507:web:bdb1345ca3fe659aa80d1e"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+    const auth = getAuth();
+
+    login.addEventListener('click', (e) => {
+
+        var admin_email = document.getElementById('email').value;
+        var admin_password = document.getElementById('password').value;
+
+
+
+        signInWithEmailAndPassword(auth, admin_email, admin_password)
+            .then((userCredential) => {
+                // Signed up 
+                const user = userCredential.user;
+
+                const dt = new Date();
+                // push user data into realtime database
+                update(ref(database, 'admin/' + user.uid), {
+                    last_login: dt
+                })
+
+                alert('Logged in!');
+                alert('You got new notifications!');
+
+                // Redirect to the next page after successful login
+                window.location.href = "dashboard_admin.html";
+
+            })
+            .catch((error) => {
+                const errorCode = error.code;
+                const errorMessage = error.message;
+
+                if (errorCode === 'auth/user-not-found') {
+                    alert('User not found. Please check your email and try again.');
+                }
+                else if (errorCode === 'auth/wrong-password') {
+                    alert('Incorrect password. Please try again.');
+                }
+                else {
+                    alert(errorMessage);
+                }
+            });
+    })
+
+    // Handle the "Forgot Password" link
+    var forgotPasswordLink = document.getElementById('forgotPassword');
+
+    forgotPasswordLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        const admin_email = document.getElementById('email').value;
+
+        // Send a password reset email
+        sendPasswordResetEmail(auth, admin_email)
+            .then(() => {
+                alert('Password reset email sent. Check your email inbox.');
+            })
+            .catch((error) => {
+                const errorCode = error.code;
+                const errorMessage = error.message;
+                alert(errorMessage);
+            });
+    });
+
+</script>
+
+</html>

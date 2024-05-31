@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <title>Dashboard</title>
+</head>
+
+<style>
+    label.lblProfile {
+        float: left;
+        width: 150px;
+    }
+
+
+</style>
+
+<body>
+
+    <header>
+       <h1>UniBOT</h1>
+    </header>
+    <!--Navigation Bar-->
+    <div class="sidebar">
+        <img class="unikl-logo" src="/img/logo-01.png">
+        <img class="profile-img-2" alt="profile" id="profilePic-2">
+        <div class="name-id">
+            <p><span id="userName-2"></span></p>
+            <p><span id="userStudid-2"></span></p>
+        </div>
+        <hr>
+        <a href="dashboard.html"><i class="fa fa-comments" aria-hidden="true"></i><label class="sidebar-title">ChatBOT</label></a>
+        <a href="user_profile.html"><i class="fa fa-address-card" aria-hidden="true"></i><label class="sidebar-title">Profile</label></a>
+        <a href="history.html"><i class="fa fa-history" aria-hidden="true"></i><label class="sidebar-title">chat history</label></a>
+        <a href="status.html"><i class="fa fa-envelope" aria-hidden="true"></i><label class="sidebar-title">Status</label></a>
+        <a id="signout"><i class="fa fa-sign-out" aria-hidden="true"></i><label class="sidebar-title">Log Out</label></a>
+    </div>
+    <div class="content">
+        <!--Student info-->
+        <div class="container">
+
+            <h2 style="text-align: center;">Student Information</h2>
+            <center><img class="profile-img" alt="profile" id="profilePic"></center>
+            <br>
+            <hr>
+
+            <div id="userInfo" class="userInfo">
+                <p><b><label class="lblProfile">Email:</label></b> <span id="userEmail"></span></p>
+                <p><b><label class="lblProfile">Name:</label></b> <span id="userName"></span></p>
+                <p><b><label class="lblProfile">Student ID:</label></b> <span id="userStudid"></span></p>
+                <p><b><label class="lblProfile">Phone:</label></b> <span id="phone"></span></p>
+                <p><b><label class="lblProfile">Gender:</label></b> <span id="userGender"></span></p>
+                <p><b><label class="lblProfile">Last Login:</label></b> <span id="lastLogin"></span></p>
+                <!-- Add other user information as needed -->
+            </div>
+
+            <hr>
+
+            <button class="edit-btn"><a href="edit_profile.html">edit</a></button>
+        </div>
+    </div>
+
+</body>
+
+<script type="module">
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getDatabase, set, ref, update, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getStorage, ref as storageRef, getDownloadURL, uploadBytes } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+    // TODO: Add SDKs for Firebase products that you want to use
+    // https://firebase.google.com/docs/web/setup#available-libraries
+
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyB_eJQZabT4vOgTzMsLnMovg_yjGtRY0x8",
+        authDomain: "chatbot-4718d.firebaseapp.com",
+        databaseURL: "https://chatbot-4718d-default-rtdb.firebaseio.com",
+        projectId: "chatbot-4718d",
+        storageBucket: "chatbot-4718d.appspot.com",
+        messagingSenderId: "320537928507",
+        appId: "1:320537928507:web:bdb1345ca3fe659aa80d1e"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+    const auth = getAuth();
+    const storage = getStorage(app);
+
+    // Get the DOM elements
+    const userEmailSpan = document.getElementById('userEmail');
+    const userNameSpan = document.getElementById('userName');
+    const userStudidSpan = document.getElementById('userStudid');
+    const userPhoneSpan = document.getElementById('phone');
+    const userGenderSpan = document.getElementById('userGender');
+    const lastLoginSpan = document.getElementById('lastLogin');
+
+    //sidebar
+    const userNameSpan2 = document.getElementById('userName-2');
+    const userStudidSpan2 = document.getElementById('userStudid-2');
+
+    // Firebase authentication state change listener
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            const uid = user.uid;
+            console.log('user logged in', user);
+
+            // Fetch user data from the database based on the user's UID
+            const currentUserRef = ref(database, 'users/' + uid);
+
+            // Update last login timestamp in the database
+            update(currentUserRef, { last_login: getCurrentTimestamp() });
+
+            // Listen for changes in the user's data
+            onValue(currentUserRef, (snapshot) => {
+                const userData = snapshot.val();
+
+                // Display user information on the dashboard page
+                displayUserInfo(userData.email, userData.studname, userData.studid, userData.phone, userData.gender, userData.last_login);
+
+                // get image from firebase storage
+                getDownloadURL(storageRef(storage, userData.email))
+                    .then((url) => {
+
+                        const img = document.getElementById('profilePic');
+                        const img2 = document.getElementById('profilePic-2');
+                        img.setAttribute('src', url);
+                        img2.setAttribute('src', url);
+                    })
+                    .catch((error) => {
+                        console.error('Error getting downlaod URL:', error);
+                    })
+
+            });
+
+        } else {
+            // User is signed out
+            console.log('user Logged out');
+        }
+    });
+
+
+    //signout function
+    signout.addEventListener('click', (e) => {
+        signOut(auth)
+            .then(() => {
+                // Successfully signed out
+                alert('Signed out!');
+                // Hide sign-out button
+                window.location.href = "Login.html";
+            })
+            .catch((error) => {
+                console.error('Error signing out:', error);
+            });
+    });
+
+    // Function to display user information
+    function displayUserInfo(email, name, studid, phone, gender, last_login) {
+        userEmailSpan.textContent = email;
+        userNameSpan.textContent = name;
+        userStudidSpan.textContent = studid;
+        userPhoneSpan.textContent = phone;
+        userGenderSpan.textContent = gender;
+        lastLoginSpan.textContent = last_login || 'N/A';
+
+        //sidebar
+        userStudidSpan2.textContent = studid;
+        userNameSpan2.textContent = name;
+    }
+
+    // Function to get current timestamp
+    function getCurrentTimestamp() {
+
+        const options = {
+            year: 'numeric',
+            month: 'numeric',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: 'numeric',
+            timeZone: 'Asia/Kuala_Lumpur',
+        };
+        return new Date().toLocaleString('en-MY', options);
+    }
+
+</script>
+
+</html>

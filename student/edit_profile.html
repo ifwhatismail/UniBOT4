@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Edit Profile</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/style.css">
+</head>
+
+<body>
+    <div class="container">
+        <div id="editForm">
+            <!-- Add your edit form fields here -->
+            <label for="editName">Name:</label><br>
+            <input type="text" id="editName" required> <br>
+
+            <label for="editStudid">Student ID:</label><br>
+            <input type="text" id="editStudid" maxlength="11" required><br>
+
+            <label for="editphone">Phone:</label><br>
+            <input type="text" id="editphone" maxlength="11" required><br>
+
+            <label for="studid"><b>Gender</b></label>
+            <input type="radio" name="gender" id="Male" value="Male"> Male
+            <input type="radio" name="gender" id="Female" value="Female" required> Female <br><br>
+
+            <button id="updateBtn" class="update-btn">Update</button>
+            <button class="cancel-btn"><a href="user_profile.html" style="text-decoration: none;">Cancel</a></button>
+        </div>
+    </div>
+</body>
+
+</html>
+
+<script type="module">
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getDatabase, set, ref, update, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    // TODO: Add SDKs for Firebase products that you want to use
+    // https://firebase.google.com/docs/web/setup#available-libraries
+
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyB_eJQZabT4vOgTzMsLnMovg_yjGtRY0x8",
+        authDomain: "chatbot-4718d.firebaseapp.com",
+        databaseURL: "https://chatbot-4718d-default-rtdb.firebaseio.com",
+        projectId: "chatbot-4718d",
+        storageBucket: "chatbot-4718d.appspot.com",
+        messagingSenderId: "320537928507",
+        appId: "1:320537928507:web:bdb1345ca3fe659aa80d1e"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+    const auth = getAuth();
+
+    // Edit form elements
+    const editName = document.getElementById('editName');
+    const editStudid = document.getElementById('editStudid');
+    const editphone = document.getElementById('editphone');
+    const updateBtn = document.getElementById('updateBtn');
+
+    
+
+    // Firebase authentication state change listener
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            const uid = user.uid;
+            console.log('user logged in', user);
+
+            // Fetch user data from the database based on the user's UID
+            const currentUserRef = ref(database, 'users/' + uid);
+
+            // Listen for changes in the user's data
+            onValue(currentUserRef, (snapshot) => {
+                const userData = snapshot.val();
+
+                // Display user information in the edit form
+                // Display user information in the edit form
+                editName.value = userData.studname || '';
+                editStudid.value = userData.studid || '';
+                editphone.value = userData.phone || '';
+                document.getElementById(userData.gender).checked = true;
+            });
+
+        } else {
+            // User is signed out
+            console.log('User Logged out');
+        }
+    });
+
+    // Save Changes button click event
+    updateBtn.addEventListener('click', () => {
+        // Get edited values
+        const newName = editName.value;
+        const newStudid = editStudid.value;
+        const newPhone = editphone.value;
+        const newGender = document.querySelector('input[name="gender"]:checked').value;
+
+        if (!newName) {
+            alert('name is empty');
+        }
+
+        else if (!newStudid) {
+            alert('Student ID is empty');
+        }
+
+        else if (!newPhone) {
+            alert('Phone Number is empty');
+        }
+
+
+        // Update the database with new values
+        update(ref(database, 'users/' + auth.currentUser.uid), {
+            studname: newName,
+            studid: newStudid,
+            phone: newPhone,
+            gender: newGender,
+        });
+
+        alert('Update sucessful');
+
+        // Redirect to the next page after successful login
+        window.location.href = "user_profile.html";
+
+    });
+
+</script>

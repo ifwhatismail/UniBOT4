@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <title>Analytics Page</title>
+</head>
+<style>
+    header {
+        background-color: #333;
+        color: #fff;
+        padding: 10px;
+        text-align: center;
+    }
+
+    .container-1 {
+        padding: 30px;
+        background-color: white;
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: 10px;
+        margin-bottom: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+    }
+
+    .chart-container {
+        flex: 1;
+        margin-right: 10px;
+    }
+
+    #myChart {
+        width: 100%;
+        height: 60vh;
+    }
+
+    table {
+        flex: 1;
+        width: 100%;
+    }
+
+    table,
+    th,
+    td {
+        border-collapse: collapse;
+        padding: 8px;
+    }
+
+    tr {
+        border-bottom: 1px solid #ddd;
+        text-align: center;
+    }
+
+    th {
+        background-color: #f2f2f2;
+    }
+</style>
+
+<body>
+    <header>
+        <h1>Analytic</h1>
+    </header>
+
+    <!--Navigation Bar-->
+    <div class="sidebar">
+        <img class="unikl-logo" src="/img/logo-01.png">
+        <img class="profile-img-2" alt="profile" id="profilePic-2">
+        <div class="name-id">
+            <p><span id="userAdminName-2"></span></p>
+            <p><span id="userAdminid-2"></span></p>
+        </div>
+        <hr>
+        <a href="dashboard_admin.html"><i class="fa fa-tachometer" aria-hidden="true"></i><label class="sidebar-title">Dashboard</label></a>
+        <a href="profile_admin.html"><i class="fa fa-address-card" aria-hidden="true"></i><label class="sidebar-title">Profile</label></a>
+        <a href="queryRequest.html"><i class="fa fa-envelope" aria-hidden="true"></i><label class="sidebar-title">Query Request</label></a>
+        <a href="tableData.html"><i class="fa fa-users" aria-hidden="true"></i><label class="sidebar-title">Student</label></a>
+        <a href="add_query.html"><i class="fa fa-plus" aria-hidden="true"></i><label class="sidebar-title">Add Query</label></a>
+        <a href="analytic.html"><i class="fa fa-bar-chart" aria-hidden="true"></i><label class="sidebar-title">Analytic</label></a>
+        <a id="signout"><i class="fa fa-sign-out" aria-hidden="true"></i><label class="sidebar-title">Log Out</label></a>
+
+    </div>
+
+    <div class="content">
+        <div class="container-1">
+            <h2>Frequent Query From User History</h2>
+            <hr>
+            <div class="chart-container">
+                <canvas id="myChart"></canvas>
+            </div>
+            <br><br>
+           
+        </div>
+        <div class="container-1">
+            <table id="tableBody">
+                <thead>
+                    <tr>
+                        <th>Query</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</body>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script type="module">
+
+    // Firebase configuration
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+    import { getStorage, ref as storageRef, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js";
+
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyB_eJQZabT4vOgTzMsLnMovg_yjGtRY0x8",
+        authDomain: "chatbot-4718d.firebaseapp.com",
+        databaseURL: "https://chatbot-4718d-default-rtdb.firebaseio.com",
+        projectId: "chatbot-4718d",
+        storageBucket: "chatbot-4718d.appspot.com",
+        messagingSenderId: "320537928507",
+        appId: "1:320537928507:web:bdb1345ca3fe659aa80d1e"
+    };
+
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+    const auth = getAuth();
+    const storage = getStorage(app);
+
+    // Get the DOM elements
+    const userAdminNameSpan2 = document.getElementById('userAdminName-2');
+    const userAdminidSpan2 = document.getElementById('userAdminid-2');
+    const signout = document.getElementById('signout');
+    const tableBody = document.getElementById('tableBody');
+
+    // Firebase authentication state change listener
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            const uid = user.uid;
+            console.log('user logged in', user);
+
+            // Fetch user data from the database based on the user's UID
+            const currentUserRef = ref(database, 'admin/' + uid);
+            onValue(currentUserRef, (snapshot) => {
+                const userData = snapshot.val();
+
+                // Display user information on the dashboard page
+                displayUserInfo(userData.admin_name, userData.admin_id);
+
+                // get image from firebase storage
+                getDownloadURL(storageRef(storage, userData.admin_email))
+                    .then((url) => {
+                        const img2 = document.getElementById('profilePic-2');
+                        img2.setAttribute('src', url);
+                    })
+                    .catch((error) => {
+                        console.error('Error getting download URL:', error);
+                    });
+            });
+        }
+
+        else {
+            // User is signed out
+            console.log('user Logged out');
+        }
+
+    });
+
+    //signout function
+    signout.addEventListener('click', (e) => {
+        signOut(auth)
+            .then(() => {
+                // Successfully signed out
+                alert('Signed out!');
+                // Hide sign-out button
+                window.location.href = "Login_admin.html";
+            })
+            .catch((error) => {
+                console.error('Error signing out:', error);
+            });
+    });
+
+    // Function to display user information
+    function displayUserInfo(name, adminid) {
+        userAdminNameSpan2.textContent = name;
+        userAdminidSpan2.textContent = adminid;
+    }
+
+    //--------------------------------------------------------------------------------------------------------------
+
+    // Reference to the 'users' node in Firebase for the chart
+    const historyRefChart = ref(database, 'users');
+    onValue(historyRefChart, (snapshot) => {
+        let queryCountsChart = {};
+
+        // Iterate over each user
+        snapshot.forEach((userSnapshot) => {
+            // Iterate over each history entry for the user
+            userSnapshot.child('history').forEach((childSnapshot) => {
+                const childData = childSnapshot.val();
+                const query = childData.query;
+                if (queryCountsChart[query]) {
+                    queryCountsChart[query]++;
+                } else {
+                    queryCountsChart[query] = 1;
+                }
+            });
+        });
+
+        // Prepare data for the chart
+        const labelsChart = Object.keys(queryCountsChart);
+        const dataChart = Object.values(queryCountsChart);
+        const backgroundColors = labelsChart.map(() => getRandomColor()); // Generate random colors
+
+        // Update the chart data with the query counts and colors
+        myChart.data.labels = labelsChart;
+        myChart.data.datasets[0].data = dataChart;
+        myChart.data.datasets[0].backgroundColor = backgroundColors;
+        myChart.data.datasets[0].borderColor = Array(labelsChart.length).fill('#000');
+
+        // Update the chart
+        myChart.update();
+    });
+
+    // Reference to the 'users' node in Firebase for the table
+    const historyRefTable = ref(database, 'users');
+    onValue(historyRefTable, (snapshot) => {
+        let queryCountsTable = {};
+        tableBody.innerHTML = '';
+
+        // Iterate over each user
+        snapshot.forEach((userSnapshot) => {
+            // Iterate over each history entry for the user
+            userSnapshot.child('history').forEach((childSnapshot) => {
+                const childData = childSnapshot.val();
+                const query = childData.query;
+                if (queryCountsTable[query]) {
+                    queryCountsTable[query]++;
+                } else {
+                    queryCountsTable[query] = 1;
+                }
+            });
+        });
+
+        // Iterate over the query counts object and add rows to the table
+        Object.keys(queryCountsTable).forEach((query) => {
+            const row = tableBody.insertRow();
+            const cell1 = row.insertCell(0);
+            const cell2 = row.insertCell(1);
+
+            cell1.textContent = query;
+            cell2.textContent = queryCountsTable[query];
+        });
+    });
+
+
+    // Get a reference to the chart canvas element
+    const ctx = document.getElementById('myChart');
+    // Initialize a Chart.js instance with an empty dataset
+    let myChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: [],
+            datasets: [{
+                axis: 'y',
+                label: 'Query Count from User History',
+                data: [],
+                backgroundColor: [],
+                borderColor: [],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                }
+            },
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Query Counts'
+                }
+            }
+        }
+    });
+
+    // Function to generate a random color
+    function getRandomColor() {
+        const letters = '0123456789ABCDEF';
+        let color = '#';
+        for (let i = 0; i < 6; i++) {
+            color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
+    }
+
+</script>
+
+</html>

@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <title>chatbot</title>
+</head>
+
+<style>
+    .content {
+        margin-left: 250px;
+        padding: 20px;
+    }
+
+    .bot-header {
+        padding: 10px;
+        background-color: #2A629A;
+        border-radius: 10px 10px 0 0;
+        margin-top: -10px;
+        margin-right: auto;
+        margin-left: auto;
+        top: 0;
+        width: 95%;
+        color: #f1f1f1;
+    }
+
+    .chatbox {
+        overflow-y:scroll;
+        margin-bottom: 0;
+        margin-top: 0;
+        margin-right: auto;
+        margin-left: auto;
+        padding: 10px;
+        background-color: white;
+        height: 50.4vh;
+        width: 95%;
+    }
+
+    #userInput {
+        padding: 10px;
+        margin-bottom: -20px;
+        margin-right: auto;
+        margin-left: auto;
+        background-color: #2A629A;
+        border-radius: 0 0 10px 10px;
+        width: 95%;
+    }
+
+    .userText,
+    .botText {
+        margin-bottom: 10px;
+        border-radius: 5px;
+    }
+
+    .userText {
+        background-color: #f1f1f1;
+        color: #333;
+        text-align: right;
+    }
+
+    .botText {
+        color: rgb(54, 52, 52);
+    }
+
+    .Container-select {
+        padding: 10px;
+        margin-bottom: auto;
+        margin-right: auto;
+        margin-left: auto;
+        background-color: #2A629A;
+        border-radius: 0 0 10px 10px;
+        bottom: 0;
+        width: 95%;
+    }
+
+    #SelectQuery {
+        padding: 15px;
+        border-style: none;
+        border-radius: 10px;
+        width: 100%;
+        text-align: center;
+        background-color: #888a8f;
+        color: white;
+    }
+
+    #textInput {
+        border: none;
+        padding: 10px;
+        border-radius: 10px;
+        font-size: 16px;
+    }
+
+    #sendButton {
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        height: 50px;
+        width: 50px;
+        cursor: pointer;
+        font-size: 16px;
+        text-align: center;
+        margin-left: 2%;
+        display: inline-block;
+    }
+
+    #SearchQuery {
+        display: inline-block;
+        width: 90%;
+    }
+
+    .online-dot {
+        background-color: #4CAF50;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        display: inline-block;
+        vertical-align: middle;
+        margin-left: 5px;
+    }
+
+   
+</style>
+
+<body>
+    <header>
+        <h1>UniBOT</h1>
+
+    </header>
+    <!--Navigation Bar-->
+    <div class="sidebar">
+        <img class="unikl-logo" src="/img/logo-01.png">
+        <img class="profile-img-2" alt="profile" id="profilePic-2">
+        <div class="name-id">
+            <p><span id="userName-2"></span></p>
+            <p><span id="userStudid-2"></span></p>
+        </div>
+        <hr>
+        <a href="dashboard.html"><i class="fa fa-comments" aria-hidden="true"></i><label
+                class="sidebar-title">ChatBOT</label></a>
+        <a href="user_profile.html"><i class="fa fa-address-card" aria-hidden="true"></i><label
+                class="sidebar-title">Profile</label></a>
+        <a href="history.html"><i class="fa fa-history" aria-hidden="true"></i><label class="sidebar-title">chat
+                history</label></a>
+        <a href="status.html"><i class="fa fa-envelope" aria-hidden="true"></i><label
+                class="sidebar-title">Status</label></a>
+        <a id="signout"><i class="fa fa-sign-out" aria-hidden="true"></i><label class="sidebar-title">Log
+                Out</label></a>
+
+    </div>
+
+    <div class="content">
+        <!-- CHAT BAR BLOCK -->
+        <div class="chatbot-container">
+            <div class="bot-header">
+                <center>
+                    <img src="/img/chat.png" style="width: 50px; display: inline-block; vertical-align: middle;">
+                    <p style="display: inline-block; vertical-align: middle; margin-left: 5px;">online</p>
+                    <span class="online-dot"></span>
+                </center>
+            </div>
+
+            <div class="chatbox">
+                <p id="botStarterMessage" class="botText"><span>Loading...</span></p>
+                <div id="ResponseOutput"></div>
+            </div>
+
+            <div id="userInput">
+                <input type="text" id="SearchQuery" placeholder="Type / Search Your Question here"
+                    onkeyup="filterQueries()" onblur="hideDropdown()">
+                <button id="sendButton">send</button>
+            </div>
+            <div class="Container-select">
+                <select id="SelectQuery" name="SelectQuery">
+                    <option value="" selected>Query</option>
+                </select>
+            </div>
+        </div> 
+    </div>
+
+</body>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="response.js"></script>
+
+<script>
+
+    function filterQueries() {
+        let input, filter, select, option, i, txtValue;
+        input = document.getElementById('SearchQuery');
+        filter = input.value.toUpperCase();
+        select = document.getElementById('SelectQuery');
+        option = select.getElementsByTagName('option');
+
+        // Show the dropdown when the search input is focused
+        select.size = 5;
+
+        for (i = 0; i < option.length; i++) {
+            txtValue = option[i].textContent || option[i].innerText;
+            if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                option[i].style.display = '';
+            } else {
+                option[i].style.display = 'none';
+            }
+        }
+    }
+
+    function hideDropdown() {
+        let select = document.getElementById('SelectQuery');
+        select.size = 1; // Show only 1 option (default)
+    }
+
+    function getTime() {
+        let today = new Date();
+        let hours = today.getHours();
+        let minutes = today.getMinutes();
+
+        if (hours < 10) {
+            hours = "0" + hours;
+        }
+
+        if (minutes < 10) {
+            minutes = "0" + minutes;
+        }
+
+        let time = hours + ":" + minutes;
+        return time;
+    }
+
+    function getCurrentDate() {
+        let today = new Date();
+        let day = today.getDate();
+        let month = today.getMonth() + 1; // Months are zero-based, so we add 1
+        let year = today.getFullYear();
+
+        let date = year + "-" + (month < 10 ? "0" : "") + month + "-" + (day < 10 ? "0" : "") + day;
+
+        return date;
+    }
+
+    function firstBotMessage() {
+        let firstMessage = "Hello! What can I assist you?"
+        document.getElementById("botStarterMessage").innerHTML = '<p class="botText"><span>' + firstMessage + '</span></p>';
+
+        let time = getTime();
+        let date = getCurrentDate();
+
+        $("#chat-timestamp").append(date + ", " + time);
+        document.getElementById("userInput").scrollIntoView(false);
+    }
+
+
+    firstBotMessage();
+
+
+    function sendMessage() {
+        // Get the user input
+        var userInput = document.getElementById("textInput").value;
+
+        if (userInput.trim() === "") {
+            alert("Please enter a message.");
+            return;
+        }
+
+        // Add user message to the chatbox
+        document.getElementById("chatbox").innerHTML += '<div class="userText"><span>' + userInput + '</span></div>';
+
+        // Clear the input field
+        document.getElementById("textInput").value = "";
+
+        // Scroll to the bottom of the chatbox
+        document.getElementById("chatbox").scrollTop = document.getElementById("chatbox").scrollHeight;
+    }
+
+
+</script>
+
+<script type="module">
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getDatabase, set, ref, update, onValue, ref as databaseRef, push, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getStorage, ref as storageRef, getDownloadURL, uploadBytes } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+    // TODO: Add SDKs for Firebase products that you want to use
+    // https://firebase.google.com/docs/web/setup#available-libraries
+
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyB_eJQZabT4vOgTzMsLnMovg_yjGtRY0x8",
+        authDomain: "chatbot-4718d.firebaseapp.com",
+        databaseURL: "https://chatbot-4718d-default-rtdb.firebaseio.com",
+        projectId: "chatbot-4718d",
+        storageBucket: "chatbot-4718d.appspot.com",
+        messagingSenderId: "320537928507",
+        appId: "1:320537928507:web:bdb1345ca3fe659aa80d1e"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+    const auth = getAuth();
+    const storage = getStorage(app);
+
+    // Get the DOM elements
+    const userNameSpan2 = document.getElementById('userName-2');
+    const userStudidSpan2 = document.getElementById('userStudid-2');
+
+    // Firebase authentication state change listener
+    onAuthStateChanged(auth, (user) => {
+
+        // get value from query
+        sendButton.addEventListener('click', (e) => {
+            const query = document.getElementById("SearchQuery").value;
+
+            if (query === "") {
+                alert("Please enter your question!");
+                return;
+            }
+
+            // Assuming 'user' is the current authenticated user
+            if (user) {
+                const uid = user.uid;
+                // Update the user's data in the database
+                const querisRef = ref(database, 'users/' + uid + '/queries');
+
+                // Get the current date and time
+                const currentDate = new Date();
+                const options = {
+                    year: 'numeric',
+                    month: 'numeric',
+                    day: 'numeric',
+                    hour: 'numeric',
+                    minute: 'numeric',
+                    timeZone: 'Asia/Kuala_Lumpur',
+                };
+                const formattedDate = currentDate.toLocaleString('en-MY', options);
+
+                push(querisRef, {
+                    query: query,
+                    status: 'Pending',
+                    query_date: formattedDate
+                });
+
+                //alert('Your question sent successfully!');
+                document.getElementById('ResponseOutput').innerHTML += '<p>' + query + '</p>';
+                document.getElementById('ResponseOutput').innerHTML += '<p>Your question cannot be answered. Check on status page and wait for the answer. Thank you</p>';
+
+            } else {
+                alert('User not authenticated.');
+            }
+        })
+
+
+        if (user) {
+            const uid = user.uid;
+            console.log('user logged in', user);
+
+            // Fetch user data from the database based on the user's UID
+            const currentUserRef = ref(database, 'users/' + uid);
+
+            // Listen for changes in the user's data
+            onValue(currentUserRef, (snapshot) => {
+                const userData = snapshot.val();
+
+                // Display user information on the dashboard page
+                displayUserInfo(userData.studname, userData.studid);
+
+                // get image from firebase storage
+                getDownloadURL(storageRef(storage, userData.email))
+                    .then((url) => {
+
+                        const img2 = document.getElementById('profilePic-2');
+                        img2.setAttribute('src', url);
+                    })
+                    .catch((error) => {
+                        console.error('Error getting downlaod URL:', error);
+                    })
+
+            });
+
+        } else {
+            // User is signed out
+            console.log('user Logged out');
+        }
+    });
+
+    //signout function
+    signout.addEventListener('click', (e) => {
+        signOut(auth)
+            .then(() => {
+                // Successfully signed out
+                alert('Signed out!');
+                // Hide sign-out button
+                window.location.href = "Login.html";
+            })
+            .catch((error) => {
+                console.error('Error signing out:', error);
+            });
+    });
+
+    // Function to display user information
+    function displayUserInfo(name, studid) {
+        userNameSpan2.textContent = name;
+        userStudidSpan2.textContent = studid;
+    }
+
+    // Dropdown list retrive query from firebase
+    // Reference to the 'chatbot' node
+    const chatbotRef = databaseRef(database, 'chatbot');
+
+    // Populate the dropdown list with queries from Firebase
+    onValue(chatbotRef, (snapshot) => {
+        const selectQuery = document.getElementById('SelectQuery');
+
+        // Clear existing options
+        selectQuery.innerHTML = '<option value="" selected>Query</option>';
+
+        // Populate the dropdown list with queries from Firebase
+        snapshot.forEach((childSnapshot) => {
+            const data = childSnapshot.val();
+            const query = data.query;
+
+            // Create a new option element for each query
+            const option = document.createElement('option');
+            option.value = query;
+            option.text = query;
+            selectQuery.appendChild(option);
+        });
+        // Trigger filterOptions to update the displayed options
+        filterOptions();
+    });
+
+    // Function to display the response for the selected query
+    function displayResponse() {
+        const selectedQuery = document.getElementById('SelectQuery').value;
+
+        // Update the SearchQuery input field with the selected query
+        document.getElementById('SearchQuery').value = selectedQuery;
+
+        // Reference to the 'chatbot' node
+        const chatbotRef = databaseRef(database, 'chatbot');
+
+        // Retrieve the response for the selected query from Firebase
+        onValue(chatbotRef, (snapshot) => {
+            let responseFound = false;
+            snapshot.forEach((childSnapshot) => {
+                const data = childSnapshot.val();
+                const query = data.query;
+                const response = data.response;
+
+                if (query === selectedQuery) {
+                    // Display the selected query above the response
+                    document.getElementById('ResponseOutput').innerHTML += '<p>' + selectedQuery + '</p>';
+                    document.getElementById('ResponseOutput').innerHTML += '<p>' + response + '</p>';
+                    responseFound = true;
+
+                    // Add the selected query and response to the user's Firebase database
+                    const user = auth.currentUser;
+                    if (user) {
+                        const uid = user.uid;
+                        const userRef = ref(database, 'users/' + uid + '/history');
+                        const dateTime = getCurrentDateTime(); // Define a function to get current date and time
+                        push(userRef, {
+                            query: selectedQuery,
+                            response: response,
+                            date: dateTime.date,
+                            time: dateTime.time
+                        });
+                    }
+
+                    return; // Exit the loop once the response is found
+                }
+            });
+
+            // If no matching query is found
+            if (!responseFound) {
+                document.getElementById('ResponseOutput').textContent = 'No response found for the selected query';
+            }
+        }, (error) => {
+            console.error('Error fetching response:', error);
+            document.getElementById('ResponseOutput').textContent = 'Error fetching response';
+        });
+    }
+
+
+    // Event listener for the dropdown menu
+    document.getElementById('SelectQuery').addEventListener('change', displayResponse);
+
+    function getCurrentDateTime() {
+        let today = new Date();
+        let day = today.getDate();
+        let month = today.getMonth() + 1; // Months are zero-based, so we add 1
+        let year = today.getFullYear();
+
+        let hours = today.getHours();
+        let minutes = today.getMinutes();
+
+        if (hours < 10) {
+            hours = "0" + hours;
+        }
+
+        if (minutes < 10) {
+            minutes = "0" + minutes;
+        }
+
+        let date = year + "-" + (month < 10 ? "0" : "") + month + "-" + (day < 10 ? "0" : "") + day;
+        let time = hours + ":" + minutes;
+
+        return { date: date, time: time };
+    }
+
+
+
+</script>
+
+</html>

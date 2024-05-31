@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/chat.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <title>Profile</title>
+</head>
+
+<style>
+    .container {
+        padding: 30px;
+        background-color: white;
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: 10px;
+        margin-bottom: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        width: 90%;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    th,
+    td {
+        padding: 12px;
+        text-align: center;
+        border-bottom: 1px solid #ddd;
+    }
+
+    th {
+        background-color: #5C88C4;
+        color: #fff;
+    }
+
+    tr:hover {
+        background-color: #ECF2FF;
+    }
+
+</style>
+
+<body>
+    <!--Header-->
+    <header>
+       <h1>UniBOT</h1>
+    </header>
+
+    <!--Navigation Bar-->
+    <div class="sidebar">
+        <img class="unikl-logo" src="/img/logo-01.png">
+        <img class="profile-img-2" alt="profile" id="profilePic-2">
+        <div class="name-id">
+            <p><span id="userName-2"></span></p>
+            <p><span id="userStudid-2"></span></p>
+        </div>
+        <hr>
+        <a href="dashboard.html"><i class="fa fa-comments" aria-hidden="true"></i><label class="sidebar-title">ChatBOT</label></a>
+        <a href="user_profile.html"><i class="fa fa-address-card" aria-hidden="true"></i><label class="sidebar-title">Profile</label></a>
+        <a href="history.html"><i class="fa fa-history" aria-hidden="true"></i><label class="sidebar-title">chat history</label></a>
+        <a href="status.html"><i class="fa fa-envelope" aria-hidden="true"></i><label class="sidebar-title">Status</label></a>
+        <a id="signout"><i class="fa fa-sign-out" aria-hidden="true"></i><label class="sidebar-title">Log Out</label></a>
+
+    </div>
+
+    <div class="content">
+        <div class="container">
+            <h2>Chat History</h2>
+            <hr>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 5%;">No.</th>
+                        <th style="width: 15%;">Date</th>
+                        <th style="width: 15%;">Time</th>
+                        <th>Query</th>
+                        <th>Response</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+</body>
+
+<script type="module">
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getStorage, ref as storageRef, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+    // TODO: Add SDKs for Firebase products that you want to use
+    // https://firebase.google.com/docs/web/setup#available-libraries
+
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyB_eJQZabT4vOgTzMsLnMovg_yjGtRY0x8",
+        authDomain: "chatbot-4718d.firebaseapp.com",
+        databaseURL: "https://chatbot-4718d-default-rtdb.firebaseio.com",
+        projectId: "chatbot-4718d",
+        storageBucket: "chatbot-4718d.appspot.com",
+        messagingSenderId: "320537928507",
+        appId: "1:320537928507:web:bdb1345ca3fe659aa80d1e"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+    const auth = getAuth();
+    const storage = getStorage(app);
+
+    // Get the DOM elements
+    const userNameSpan2 = document.getElementById('userName-2');
+    const userStudidSpan2 = document.getElementById('userStudid-2');
+    const tableBody = document.getElementById('tableBody');
+
+    // Firebase authentication state change listener
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            const uid = user.uid;
+            console.log('user logged in', user);
+
+            // Fetch user data from the database based on the user's UID
+            const currentUserRef = ref(database, 'users/' + uid);
+
+            // Listen for changes in the user's data
+            onValue(currentUserRef, (snapshot) => {
+                const userData = snapshot.val();
+
+                // Display user information on the dashboard page
+                displayUserInfo(userData.studname, userData.studid);
+
+                // get image from firebase storage
+                getDownloadURL(storageRef(storage, userData.email))
+                    .then((url) => {
+                        const img2 = document.getElementById('profilePic-2');
+                        img2.setAttribute('src', url);
+                    })
+                    .catch((error) => {
+                        console.error('Error getting download URL:', error);
+                    });
+
+                // Reference to the 'queries' node for the current user
+                const userQueriesRef = ref(database, 'users/' + uid + '/history');
+                // Initialize a counter for the row numbers in the table
+                let rowNum = 1;
+                // Listen for changes in the user's queries data
+                onValue(userQueriesRef, (snapshot) => {
+                    tableBody.innerHTML = ''; // Clear existing table content
+
+                    snapshot.forEach((childSnapshot) => {
+                        const data = childSnapshot.val();
+                        const query = data.query;
+                        const response = data.response;
+                        const date = data.date;
+                        const time = data.time;
+
+                        // Combine date and time to create a UNIX timestamp
+                        const timestamp = new Date(date + 'T' + time + ':00').getTime();
+
+
+                        // Create a new row for each query in the table
+                        const row = tableBody.insertRow();
+                        const cell1 = row.insertCell(0);
+                        const cell2 = row.insertCell(1);
+                        const cell3 = row.insertCell(2);
+                        const cell4 = row.insertCell(3);
+                        const cell5 = row.insertCell(4);
+
+                        cell1.textContent = rowNum;
+                        cell2.textContent = formatDate(timestamp); // You can modify this to get the date from Firebase if needed
+                        cell3.textContent = formatTime(timestamp); // You can modify this to get the time from Firebase if needed
+                        cell4.textContent = query;
+                        cell5.textContent = response;
+
+                        rowNum++;
+                    });
+
+                });
+
+
+
+            });
+
+
+        } else {
+            // User is signed out
+            console.log('user Logged out');
+        }
+
+    });
+
+    function formatDate(timestamp) {
+        const date = new Date(timestamp);
+        return date.toLocaleDateString();
+    }
+
+    function formatTime(timestamp) {
+        const time = new Date(timestamp);
+        return time.toLocaleTimeString();
+    }
+
+    //signout function
+    signout.addEventListener('click', (e) => {
+        signOut(auth)
+            .then(() => {
+                // Successfully signed out
+                alert('Signed out!');
+                // Hide sign-out button
+                window.location.href = "Login.html";
+            })
+            .catch((error) => {
+                console.error('Error signing out:', error);
+            });
+    });
+
+    // Function to display user information
+    function displayUserInfo(name, studid) {
+        userNameSpan2.textContent = name;
+        userStudidSpan2.textContent = studid;
+    }
+
+
+
+
+</script>
+
+</html>

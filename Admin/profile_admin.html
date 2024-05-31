@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <title>Dashboard</title>
+</head>
+
+<style>
+    label.lblProfile {
+        float: left;
+        width: 150px;
+    }
+
+    .userInfo {
+        justify-content: center;
+    }
+</style>
+
+<body>
+    <header>
+        <h1>Admin Profile</h1>
+    </header>
+
+    <!--Navigation Bar-->
+    <div class="sidebar">
+        <img class="unikl-logo" src="/img/logo-01.png">
+        <img class="profile-img-2" alt="profile" id="profilePic-2">
+        <div class="name-id">
+            <p><span id="userAdminName-2"></span></p>
+            <p><span id="userAdminid-2"></span></p>
+        </div>
+        <hr>
+        <a href="dashboard_admin.html"><i class="fa fa-tachometer" aria-hidden="true"></i><label class="sidebar-title">Dashboard</label></a>
+        <a href="profile_admin.html"><i class="fa fa-address-card" aria-hidden="true"></i><label class="sidebar-title">Profile</label></a>
+        <a href="queryRequest.html"><i class="fa fa-envelope" aria-hidden="true"></i><label class="sidebar-title">Query Request</label></a>
+        <a href="tableData.html"><i class="fa fa-users" aria-hidden="true"></i><label class="sidebar-title">Student</label></a>
+        <a href="add_query.html"><i class="fa fa-plus" aria-hidden="true"></i><label class="sidebar-title">Add Query</label></a>
+        <a href="analytic.html"><i class="fa fa-bar-chart" aria-hidden="true"></i><label class="sidebar-title">Analytic</label></a>
+        <a id="signout"><i class="fa fa-sign-out" aria-hidden="true"></i><label class="sidebar-title">Log Out</label></a>
+    </div>
+
+    <div class="content">
+        <!--Student info-->
+        <div class="container">
+
+            <h2 style="text-align: center;">Admin Information</h2>
+            <center><img class="profile-img" alt="profile" id="profilePic"></center>
+            <br>
+            <hr>
+
+
+            <div id="userInfo" class="userInfo">
+                <p><b><label class="lblProfile">Email:</label> </b> <span id="admin_email"></span></p>
+                <p><b><label class="lblProfile">Name:</label></b> <span id="admin_name"></span></p>
+                <p><b><label class="lblProfile">Admin ID:</label></b> <span id="admin_id"></span></p>
+                <p><b><label class="lblProfile">Phone:</label></b> <span id="admin_phone"></span></p>
+                <p><b><label class="lblProfile">Gender:</label></b> <span id="admin_gender"></span></p>
+                <p><b><label class="lblProfile">Last Login:</label></b> <span id="lastLogin"></span></p>
+                <!-- Add other user information as needed -->
+            </div>
+
+
+
+            <hr>
+
+            <button class="edit-btn"><a href="edit_profile_admin.html">edit</a></button>
+            <button class="cancel-btn"><a href="tableData.html">Back</a></button>
+        </div>
+    </div>
+
+</body>
+
+<script type="module">
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getDatabase, set, ref, update, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getStorage, ref as storageRef, getDownloadURL, uploadBytes } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+    // TODO: Add SDKs for Firebase products that you want to use
+    // https://firebase.google.com/docs/web/setup#available-libraries
+
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyB_eJQZabT4vOgTzMsLnMovg_yjGtRY0x8",
+        authDomain: "chatbot-4718d.firebaseapp.com",
+        databaseURL: "https://chatbot-4718d-default-rtdb.firebaseio.com",
+        projectId: "chatbot-4718d",
+        storageBucket: "chatbot-4718d.appspot.com",
+        messagingSenderId: "320537928507",
+        appId: "1:320537928507:web:bdb1345ca3fe659aa80d1e"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+    const auth = getAuth();
+    const storage = getStorage(app);
+
+    // Get the DOM elements
+    const userEmailSpan = document.getElementById('admin_email');
+    const userNameSpan = document.getElementById('admin_name');
+    const userStudidSpan = document.getElementById('admin_id');
+    const userPhoneSpan = document.getElementById('admin_phone');
+    const userGenderSpan = document.getElementById('admin_gender');
+    const lastLoginSpan = document.getElementById('lastLogin');
+
+    //sidebar
+    const userNameSpan2 = document.getElementById('userAdminName-2');
+    const userStudidSpan2 = document.getElementById('userAdminid-2');
+
+    // Firebase authentication state change listener
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            const uid = user.uid;
+            console.log('user logged in', user);
+
+            // Fetch user data from the database based on the user's UID
+            const currentUserRef = ref(database, 'admin/' + uid);
+
+            // Update last login timestamp in the database
+            update(currentUserRef, { last_login: getCurrentTimestamp() });
+
+            // Listen for changes in the user's data
+            onValue(currentUserRef, (snapshot) => {
+                const userData = snapshot.val();
+
+                // Display user information on the dashboard page
+                displayUserInfo(userData.admin_email, userData.admin_name, userData.admin_id, userData.admin_phone, userData.admin_gender, userData.last_login);
+
+                // get image from firebase storage
+                getDownloadURL(storageRef(storage, userData.admin_email))
+                    .then((url) => {
+
+                        const img = document.getElementById('profilePic');
+                        const img2 = document.getElementById('profilePic-2');
+                        img.setAttribute('src', url);
+                        img2.setAttribute('src', url);
+                    })
+                    .catch((error) => {
+                        console.error('Error getting downlaod URL:', error);
+                    })
+            });
+
+        } else {
+            // User is signed out
+            console.log('user Logged out');
+        }
+    });
+
+    //signout function
+    signout.addEventListener('click', (e) => {
+        signOut(auth)
+            .then(() => {
+                // Successfully signed out
+                alert('Signed out!');
+                // Hide sign-out button
+                window.location.href = "Login_admin.html";
+            })
+            .catch((error) => {
+                console.error('Error signing out:', error);
+            });
+    });
+
+    // Function to display user information
+    function displayUserInfo(email, name, id, phone, gender, last_login) {
+        userEmailSpan.textContent = email;
+        userNameSpan.textContent = name;
+        userStudidSpan.textContent = id;
+        userPhoneSpan.textContent = phone;
+        userGenderSpan.textContent = gender;
+        lastLoginSpan.textContent = last_login || 'N/A';
+
+        //sidebar
+        userStudidSpan2.textContent = id;
+        userNameSpan2.textContent = name;
+    }
+
+    // Function to get current timestamp
+    function getCurrentTimestamp() {
+
+        const options = {
+            year: 'numeric',
+            month: 'numeric',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: 'numeric',
+            timeZone: 'Asia/Kuala_Lumpur',
+        };
+        return new Date().toLocaleString('en-MY', options);
+    }
+
+</script>
+
+</html>

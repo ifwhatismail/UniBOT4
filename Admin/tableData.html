@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+</head>
+
+<style>
+  .container-1 {
+    padding: 30px;
+    background-color: white;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    overflow-y: scroll;
+    border-radius: 10px;
+  }
+
+  .container-2 {
+    padding: 30px;
+    background-color: white;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    display: none;
+  }
+
+  .close-btn {
+    color: white;
+    background-color: brown;
+    border-style: none;
+    padding: 5px;
+  }
+
+  table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    th,
+    td {
+        padding: 12px;
+        text-align: center;
+        border-bottom: 1px solid #ddd;
+    }
+
+    th {
+        background-color: #5C88C4;
+        color: #fff;
+    }
+
+    tr:hover {
+        background-color: #ECF2FF;
+    }
+</style>
+
+<body>
+
+  <header>
+   <h1>Student Information</h1>
+  </header>
+
+  <!--Navigation Bar-->
+  <div class="sidebar">
+    <img class="unikl-logo" src="/img/logo-01.png">
+    <img class="profile-img-2" alt="profile" id="profilePic-2">
+    <div class="name-id">
+      <p><span id="userAdminName-2"></span></p>
+      <p><span id="userAdminid-2"></span></p>
+    </div>
+    <hr>
+    <a href="dashboard_admin.html"><i class="fa fa-tachometer" aria-hidden="true"></i><label class="sidebar-title">Dashboard</label></a>
+    <a href="profile_admin.html"><i class="fa fa-address-card" aria-hidden="true"></i><label class="sidebar-title">Profile</label></a>
+    <a href="queryRequest.html"><i class="fa fa-envelope" aria-hidden="true"></i><label class="sidebar-title">Query Request</label></a>
+    <a href="tableData.html"><i class="fa fa-users" aria-hidden="true"></i><label class="sidebar-title">Student</label></a>
+    <a href="add_query.html"><i class="fa fa-plus" aria-hidden="true"></i><label class="sidebar-title">Add Query</label></a>
+    <a href="analytic.html"><i class="fa fa-bar-chart" aria-hidden="true"></i><label class="sidebar-title">Analytic</label></a>
+    <a id="signout"><i class="fa fa-sign-out" aria-hidden="true"></i><label class="sidebar-title">Log Out</label></a>
+
+  </div>
+
+  <div class="content">
+
+    <div class="container-1">
+      <h2>List of Registered User (<span id="totalUsers"></span> Users)</h2>
+      <hr>
+      <table id="userTable" >
+        <thead>
+          <tr>
+            <th>No.</th>
+            <th>Name</th>
+            <th>Student ID</th>
+            <th>Phone</th>
+            <th>Gender</th>
+            <th>Email</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="userDataBody">
+          <!-- Table body will be populated dynamically -->
+        </tbody>
+      </table>
+    </div>
+
+    <div class="container-2" id="myForm">
+      <h2>Edit User</h2>
+      <hr>
+      <input type="text" placeholder="Name" id="studname">
+      <input type="text" placeholder="Student ID" id="studid">
+      <input type="text" placeholder="Email" id="email">
+      <input type="text" placeholder="Phone" id="phone">
+      <button class="update-btn" id="update">Update</button>
+      <button class="close-btn" onclick="closeForm()">Close</button>
+
+    </div>
+
+  </div>
+</body>
+<script>
+  function closeForm() {
+    document.getElementById("myForm").style.display = "none";
+  }
+</script>
+
+<script type="module">
+
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+  import { getDatabase, set, ref, ref as databaseRef, update, onValue, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+  import { getStorage, ref as storageRef, getDownloadURL, uploadBytes } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  const firebaseConfig = {
+    apiKey: "AIzaSyB_eJQZabT4vOgTzMsLnMovg_yjGtRY0x8",
+    authDomain: "chatbot-4718d.firebaseapp.com",
+    databaseURL: "https://chatbot-4718d-default-rtdb.firebaseio.com",
+    projectId: "chatbot-4718d",
+    storageBucket: "chatbot-4718d.appspot.com",
+    messagingSenderId: "320537928507",
+    appId: "1:320537928507:web:bdb1345ca3fe659aa80d1e"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const database = getDatabase(app);
+  const auth = getAuth();
+  const storage = getStorage(app);
+
+  // Get the DOM elements
+  const userAdminNameSpan2 = document.getElementById('userAdminName-2');
+  const userAdminIdSpan2 = document.getElementById('userAdminid-2');
+
+  // Firebase authentication state change listener
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      const uid = user.uid;
+      console.log('user logged in', user);
+
+      // Fetch user data from the database based on the user's UID
+      const currentUserRef = ref(database, 'admin/' + uid);
+
+      // Listen for changes in the user's data
+      onValue(currentUserRef, (snapshot) => {
+        const userData = snapshot.val();
+
+        // Display user information on the dashboard page
+        displayUserInfo(userData.admin_name, userData.admin_id);
+
+        // get image from firebase storage
+        getDownloadURL(storageRef(storage, userData.admin_email))
+          .then((url) => {
+
+            const img2 = document.getElementById('profilePic-2');
+            img2.setAttribute('src', url);
+          })
+          .catch((error) => {
+            console.error('Error getting downlaod URL:', error);
+          })
+
+      });
+
+    }
+    else {
+      // User is signed out
+      console.log('user Logged out');
+    }
+  });
+
+  // Function to display user information
+  function displayUserInfo(name, adminid) {
+    userAdminNameSpan2.textContent = name;
+    userAdminIdSpan2.textContent = adminid;
+  }
+
+
+  //signout function
+  const signout = document.getElementById('signout');
+  signout.addEventListener('click', (e) => {
+    signOut(auth)
+      .then(() => {
+        // Successfully signed out
+        alert('Signed out!');
+        // Hide sign-out button
+        window.location.href = "Login_admin.html";
+      })
+      .catch((error) => {
+        console.error('Error signing out:', error);
+      });
+  });
+
+  // Fetch user data from Firebase Realtime Database
+  const userDataRef = ref(database, 'users');
+  onValue(userDataRef, (snapshot) => {
+    const userData = snapshot.val();
+    const userDataBody = document.getElementById('userDataBody');
+    userDataBody.innerHTML = ''; // Clear previous data
+
+    let totalUsers = 0;
+    let rowNumber = 0;
+    for (const key in userData) {
+      if (Object.hasOwnProperty.call(userData, key)) {
+        const user = userData[key];
+        const row = document.createElement('tr');
+        rowNumber++;
+        row.innerHTML = `
+                          <td>${rowNumber}</td>
+                          <td>${user.studname}</td>
+                          <td>${user.studid}</td>
+                          <td>${user.phone}</td>
+                          <td>${user.gender}</td>
+                          <td>${user.email}</td>
+                          <td>
+                              <button class="edit-btn" data-key="${key}">Edit</button>
+                              <button class="delete-btn" data-key="${key}">Delete</button>
+                          </td>
+                      `;
+        userDataBody.appendChild(row);
+        totalUsers++;
+      }
+    }
+    document.getElementById('totalUsers').textContent = totalUsers;
+
+    // Add event listener for edit and delete buttons using event delegation
+    userDataBody.addEventListener('click', (event) => {
+      if (event.target.classList.contains('edit-btn')) {
+        const key = event.target.getAttribute('data-key');
+        editUser(key);
+      } else if (event.target.classList.contains('delete-btn')) {
+        const key = event.target.getAttribute('data-key');
+        deleteUser(key);
+      }
+    });
+  });
+
+  ;
+  // Function to edit user data
+  function editUser(key) {
+    const userRef = ref(database, `users/${key}`);
+    onValue(userRef, (snapshot) => {
+      const user = snapshot.val();
+      // Populate the edit form with user data
+      document.getElementById('studname').value = user.studname;
+      document.getElementById('studid').value = user.studid;
+      document.getElementById('phone').value = user.phone;
+      document.getElementById('email').value = user.email;
+      // Display the edit form
+      document.getElementById('myForm').style.display = 'block';
+      // Store the user key for update operation
+      document.getElementById('update').setAttribute('data-key', key);
+    });
+  }
+
+  // Function to delete user data
+  function deleteUser(key) {
+    if (confirm('Are you sure you want to delete this user?')) {
+      const userRef = ref(database, `users/${key}`);
+      remove(userRef)
+        .then(() => {
+          alert('User deleted successfully');
+        })
+        .catch((error) => {
+          console.error('Error deleting user:', error);
+        });
+    }
+  }
+
+  // Function to update user data
+  document.getElementById('update').addEventListener('click', () => {
+    const key = document.getElementById('update').getAttribute('data-key');
+    const userRef = ref(database, `users/${key}`);
+    const newData = {
+      studname: document.getElementById('studname').value,
+      studid: document.getElementById('studid').value,
+      phone: document.getElementById('phone').value,
+      email: document.getElementById('email').value
+      // Add other fields as needed
+    };
+    update(userRef, newData)
+      .then(() => {
+        alert('User data updated successfully');
+        // Hide the edit form
+        document.getElementById('myForm').style.display = 'none';
+      })
+      .catch((error) => {
+        console.error('Error updating user data:', error);
+      });
+  });
+
+
+
+
+</script>
+
+</html>

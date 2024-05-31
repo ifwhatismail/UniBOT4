@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <title>Query Request Page</title>
+</head>
+<style>
+    header {
+        background-color: #333;
+        color: #fff;
+        padding: 10px;
+        text-align: center;
+    }
+
+    .container-1 {
+        padding: 30px;
+        background-color: white;
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: 10px;
+        margin-bottom: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+        overflow: auto;
+    }
+
+    .container-2 {
+        padding: 30px;
+        background-color: white;
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: 10px;
+        margin-bottom: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+       overflow: auto;
+    }
+
+    .container-3 {
+        padding: 30px;
+        background-color: white;
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: 10px;
+        margin-bottom: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+        overflow: auto;
+    }
+
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    th,
+    td {
+        padding: 12px;
+        text-align: center;
+        border-bottom: 1px solid #ddd;
+    }
+
+    
+
+    th {
+        background-color: #5C88C4;
+        color: #fff;
+    }
+
+    tr:hover {
+        background-color: #ECF2FF;
+    }
+
+    #resolved {
+        display: none;
+    }
+
+
+    .container-response {
+        padding: 30px;
+        background-color: white;
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: 10px;
+        margin-bottom: 50px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        display: none;
+    }
+
+    .btn-answer {
+        color: white;
+        background-color: #5290ec;
+        border-style: none;
+        padding: 8px;
+        cursor: pointer;
+        border-radius: 5px;
+    }
+
+    .btn-close {
+        color: white;
+        background-color: #ec5252;
+        border-style: none;
+        padding: 8px;
+        cursor: pointer;
+        border-radius: 5px;
+    }
+
+
+    .section-2 {
+        overflow-y: scroll;
+    }
+
+    #totalRequests {
+
+        border-radius: 100%;
+        margin-left: 5px;
+        border: none;
+        font-size: 20px;
+    }
+
+    button:hover {
+        background-color: rgb(136, 133, 133);
+    }
+
+    .unresolve-btn {
+        width: 46%;
+        color: white;
+        background-color: #655DBB;
+    }
+
+    .resolved-btn {
+        width: 46%;
+        float: right;
+        color: white;
+        background-color: #BFACE2;
+    }
+
+    button {
+        padding: 30px;
+        border-radius: 10px;
+        border-style: none;
+        cursor: pointer;
+        font-size: 20px;
+    }
+</style>
+
+<body>
+    <header>
+        <h1>Query Request</h1>
+    </header>
+
+    <!--Navigation Bar-->
+    <div class="sidebar">
+        <img class="unikl-logo" src="/img/logo-01.png">
+        <img class="profile-img-2" alt="profile" id="profilePic-2">
+        <div class="name-id">
+            <p><span id="userAdminName-2"></span></p>
+            <p><span id="userAdminid-2"></span></p>
+        </div>
+        <hr>
+        <a href="dashboard_admin.html"><i class="fa fa-tachometer" aria-hidden="true"></i><label class="sidebar-title">Dashboard</label></a>
+        <a href="profile_admin.html"><i class="fa fa-address-card" aria-hidden="true"></i><label class="sidebar-title">Profile</label></a>
+        <a href="queryRequest.html"><i class="fa fa-envelope" aria-hidden="true"></i><label class="sidebar-title">Query Request</label></a>
+        <a href="tableData.html"><i class="fa fa-users" aria-hidden="true"></i><label class="sidebar-title">Student</label></a>
+        <a href="add_query.html"><i class="fa fa-plus" aria-hidden="true"></i><label class="sidebar-title">Add Query</label></a>
+        <a href="analytic.html"><i class="fa fa-bar-chart" aria-hidden="true"></i><label class="sidebar-title">Analytic</label></a>
+        <a id="signout"><i class="fa fa-sign-out" aria-hidden="true"></i><label class="sidebar-title">Log Out</label></a>
+
+    </div>
+
+    <div class="content">
+        <div class="container-1">
+            <button class="unresolve-btn" onclick="unresolve()">Unresolved Query</button>
+            <button class="resolved-btn" onclick="resolved()">Resolved Query</button>
+        </div>
+
+        <div class="container-3" id="unresolve">
+            <h2>Unresolved Query</h2>
+            <hr>
+            <table id="infoTable">
+                <thead>
+                    <tr>
+                        <th>No.</th>
+                        <th>Name</th>
+                        <th>Student ID</th>
+                        <th>Email</th>
+                        <th>Query</th>
+                        <th>Date</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- Add more rows as needed -->
+                </tbody>
+            </table>
+        </div>
+
+        <div class="container-3" id="resolved">
+            <h2>Resolved Query</h2>
+            <hr>
+            <table id="infoTableResolved">
+                <thead>
+                    <tr>
+                        <th>No.</th>
+                        <th>Name</th>
+                        <th>Student ID</th>
+                        <th>Email</th>
+                        <th>Query</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody1">
+                    <!-- Add more rows as needed -->
+                </tbody>
+            </table>
+        </div>
+
+
+        <div class="container-response" id="myForm">
+            <form class="form-container" id="form">
+                <h1>Response the query</h1>
+                <hr>
+                <label for="query"><b>Query</b></label><br>
+                <input type="text" placeholder="Query..." name="query" id="query" required><br>
+
+                <label for="name"><b>Name</b></label><br>
+                <input type="text" placeholder="Name" name="name" id="studname" required><br>
+
+                <label for="studid"><b>Student ID</b></label><br>
+                <input type="text" placeholder="student ID" name="studid" id="studid" required><br>
+
+                <label for="email"><b>Email</b></label><br>
+                <input type="email" placeholder="Email" name="email" id="email" required><br>
+
+                <label for="answer"><b>Answer</b></label><br>
+                <input id="answer" type="text" placeholder="Enter Answer" name="answer" required>
+
+                <button type="button" class="btn-answer" id="send">Answer</button>
+                <button type="button" class="btn-close" onclick="closeForm()">Close</button>
+            </form>
+        </div>
+
+    </div>
+    </div>
+
+</body>
+
+<script>
+    function unresolve() {
+        document.getElementById("unresolve").style.display = "block";
+        document.getElementById("resolved").style.display = "none";
+    }
+
+    function resolved() {
+        document.getElementById("resolved").style.display = "block";
+        document.getElementById("unresolve").style.display = "none";
+    }
+
+    function response(query, studname, studid, email) {
+        document.getElementById("myForm").style.display = "block";
+        document.getElementById("query").value = query;
+        document.getElementById("studname").value = studname;
+        document.getElementById("email").value = email;
+        document.getElementById("studid").value = studid;
+    }
+
+    function closeForm() {
+        document.getElementById("myForm").style.display = "none";
+    }
+</script>
+
+<script type="module">
+
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getDatabase, set, ref, push, update, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getStorage, ref as storageRef, getDownloadURL, uploadBytes } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+    // TODO: Add SDKs for Firebase products that you want to use
+    // https://firebase.google.com/docs/web/setup#available-libraries
+
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyB_eJQZabT4vOgTzMsLnMovg_yjGtRY0x8",
+        authDomain: "chatbot-4718d.firebaseapp.com",
+        databaseURL: "https://chatbot-4718d-default-rtdb.firebaseio.com",
+        projectId: "chatbot-4718d",
+        storageBucket: "chatbot-4718d.appspot.com",
+        messagingSenderId: "320537928507",
+        appId: "1:320537928507:web:bdb1345ca3fe659aa80d1e"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+    const auth = getAuth();
+    const storage = getStorage(app);
+
+    // Get the DOM elements
+    const userNameSpan2 = document.getElementById('userAdminName-2');
+    const userAdminidSpan2 = document.getElementById('userAdminid-2');
+    const signout = document.getElementById('signout');
+
+    //-------------------------Admin Firebase---------------------------------------
+
+    // Firebase admin authentication state change listener
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            const uid = user.uid;
+            console.log('user logged in', user);
+
+            // Fetch user data from the database based on the user's UID
+            const currentUserRef = ref(database, 'admin/' + uid);
+
+            // Listen for changes in the user's data
+            onValue(currentUserRef, (snapshot) => {
+                const userData = snapshot.val();
+
+                // Display user information on the dashboard page
+                displayUserInfo(userData.admin_name, userData.admin_id);
+
+                // get image from firebase storage
+                getDownloadURL(storageRef(storage, userData.admin_email))
+                    .then((url) => {
+
+                        const img2 = document.getElementById('profilePic-2');
+                        img2.setAttribute('src', url);
+                    })
+                    .catch((error) => {
+                        console.error('Error getting downlaod URL:', error);
+                    })
+
+            });
+        } else {
+            // User is signed out
+            console.log('user Logged out');
+        }
+
+
+        fetchAllData(); // fetch data from users
+
+    });
+
+    //signout function
+    signout.addEventListener('click', (e) => {
+        signOut(auth)
+            .then(() => {
+                // Successfully signed out
+                alert('Signed out!');
+                // Hide sign-out button
+                window.location.href = "Login_admin.html";
+            })
+            .catch((error) => {
+                console.error('Error signing out:', error);
+            });
+    });
+
+    //-------------------------Fetch users data from Firebase---------------------------------------
+
+    function fetchAllData() {
+        const userDataRef = ref(database, 'users/');
+        onValue(userDataRef, (snapshot) => {
+            const userData = snapshot.val();
+            if (userData) {
+                const unresolvedTable = document.getElementById('infoTable');
+                const resolvedTable = document.getElementById('infoTableResolved');
+
+                // Clear existing rows
+                unresolvedTable.innerHTML = "<tr><th>No.</th><th>Name</th><th>Student ID</th><th>Email</th><th>Query</th><th>Date</th><th>Status</th><th>Action</th></tr>";
+                resolvedTable.innerHTML = "<tr><th>No.</th><th>Name</th><th>Student ID</th><th>Email</th><th>Query</th><th>Answer</th><th>Date</th><th>Status</th></tr>";
+
+                let unresolvedCounter = 1;
+                let resolvedCounter = 1;
+                let totalRequests = 0; // Total number of requests
+
+                Object.entries(userData).forEach(([key, user]) => {
+                    if (user.queries) {
+                        Object.entries(user.queries).forEach(([queryKey, queryData]) => {
+                            if (queryData.status === 'Pending') {
+                                const row = unresolvedTable.insertRow(-1);
+                                row.innerHTML =
+                                    `<td>${unresolvedCounter}</td>
+                                <td>${user.studname}</td>
+                                <td>${user.studid}</td>
+                                <td>${user.email}</td>
+                                <td>${queryData.query}</td>
+                                <td>${queryData.query_date}</td>
+                                <td>${queryData.status}</td>
+                                <td><button class="edit-btn" onclick="response('${queryData.query}','${user.studname}','${user.studid}','${user.email}')">Response</button></td>`;
+                                unresolvedCounter++;
+                                totalRequests++;
+                            } else if (queryData.status === 'Solved') {
+                                const resolvedRow = resolvedTable.insertRow(-1);
+                                resolvedRow.innerHTML =
+                                    `<td>${resolvedCounter}</td>
+                                <td>${user.studname}</td>
+                                <td>${user.studid}</td>
+                                <td>${user.email}</td>
+                                <td>${queryData.query}</td>
+                                <td>${queryData.answer}</td>
+                                <td>${queryData.query_date}</td>
+                                <td>${queryData.status}</td>`;
+                                resolvedCounter++;
+                            }
+                        });
+                    }
+                });
+
+                // Display total number of query requests on the unresolved table
+                const totalRequestsSpan = document.getElementById('totalRequests');
+                totalRequestsSpan.textContent = totalRequests;
+            }
+        });
+    }
+
+
+
+
+    function sendAnswer(answer, studname, studid, email, query) {
+        // Get the selected user's UID based on their name
+        const usersRef = ref(database, 'users/');
+        onValue(usersRef, (snapshot) => {
+            const userData = snapshot.val();
+            if (userData) {
+                Object.entries(userData).forEach(([key, user]) => {
+                    if (user.studid === studid && user.queries) {
+                        // Check if the user has the specified query
+                        const queryKeys = Object.keys(user.queries);
+                        const queryIndex = queryKeys.findIndex((queryKey) => user.queries[queryKey].query === query);
+
+                        if (queryIndex !== -1) {
+                            // If the query exists, update the answer inside the 'queries' node
+                            const queryKey = queryKeys[queryIndex];
+                            const queryRef = ref(database, `users/${key}/queries/${queryKey}`);
+
+                            // Update the 'answer' and 'date' fields
+                            update(queryRef, {
+                                answer: answer,
+                                status: 'Solved',
+                                answer_date: new Date().toLocaleString('en-MY', {
+                                    year: 'numeric',
+                                    month: 'numeric',
+                                    day: 'numeric',
+                                    hour: 'numeric',
+                                    minute: 'numeric',
+                                    timeZone: 'Asia/Kuala_Lumpur',
+                                }),
+                            });
+
+                            // Close the response form
+                            closeForm();
+
+                            // Send email notification
+                            const email = user.email; // Assuming user's email is stored in the 'email' field
+                            const mailOptions = {
+                                from: 'ifwhatismail@gmail.com',
+                                to: email,
+                                subject: 'Your query has been resolved',
+                                text: 'Your query has been resolved. Please login to view the response.'
+                            };
+
+                            // Send email
+                            transporter.sendMail(mailOptions, (error, info) => {
+                                if (error) {
+                                    console.error('Error sending email:', error);
+                                } else {
+                                    console.log('Email sent:', info.response);
+                                }
+                            });
+
+                            // Optionally, you can update the table or perform any other actions
+                        } else {
+                            // The specified query does not exist, handle this case if needed
+                            console.warn('Specified query does not exist.');
+                        }
+                    }
+                });
+            }
+        });
+
+        // Show alert after the answer is set
+        alert('Answer sent successfully');
+    }
+
+
+    // Event listener for the "Answer" button
+    const sendButton = document.getElementById('send');
+    sendButton.addEventListener('click', () => {
+        const answer = document.getElementById('answer').value;
+        const studid = document.getElementById('studid').value;
+        const studname = document.getElementById('studname').value;
+        const email = document.getElementById('email').value;
+        const query = document.getElementById('query').value;
+
+        // Call the function to send the answer to Firebase
+        sendAnswer(answer, studname, studid, email, query);
+    });
+
+
+    //-------------------------FUNCTION---------------------------------------
+
+    // Function to display user information
+    function displayUserInfo(name, adminid) {
+        userNameSpan2.textContent = name;
+        userAdminidSpan2.textContent = adminid;
+    }
+
+
+</script>
+
+</html>
